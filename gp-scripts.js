@@ -76,44 +76,14 @@
   onReady(function () {
 
     // ============================================================
-    // REVEAL-ON-SCROLL · técnica idêntica à LP Varejo (funciona no GP)
-    // Pré-marca above-the-fold como .in ANTES de armar reveal-armed,
-    // tudo no mesmo tick pra não deixar elementos invisíveis num paint.
+    // REVEAL-ON-SCROLL · DESATIVADO temporariamente
+    // O sistema de reveal estava escondendo as seções abaixo de Decisores no Great Pages.
+    // Por ora, todas as seções aparecem imediatamente sem animação de entrada.
+    // As outras animações (deck-cycle, counter, typed, hover) continuam funcionando.
     // ============================================================
-    var revealEls = $$('.reveal');
-    revealEls.forEach(function (el) {
-      var r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight * 0.95 && r.bottom > 0) el.classList.add('in');
-    });
-    document.documentElement.classList.add('reveal-armed');
-    if ('IntersectionObserver' in window) {
-      var revealObs = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { e.target.classList.add('in'); revealObs.unobserve(e.target); }
-        });
-      }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
-      revealEls.forEach(function (el) { if (!el.classList.contains('in')) revealObs.observe(el); });
-
-      // SAFETY NET · scroll handler que força .in em qualquer .reveal que entrou no viewport,
-      // caso o IntersectionObserver não dispare (acontece em alguns layouts complexos).
-      // Também roda a cada scroll pra garantir nenhuma seção fique invisível pra sempre.
-      function checkRevealsOnScroll() {
-        revealEls.forEach(function (el) {
-          if (el.classList.contains('in')) return;
-          var r = el.getBoundingClientRect();
-          if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('in');
-        });
-      }
-      window.addEventListener('scroll', checkRevealsOnScroll, { passive: true });
-
-      // FALLBACK FINAL · depois de 3s, força .in em qualquer .reveal ainda invisível.
-      // Garante que nada fique escondido pra sempre, mesmo se o IO falhar completamente.
-      setTimeout(function () {
-        revealEls.forEach(function (el) { el.classList.add('in'); });
-      }, 3000);
-    } else {
-      revealEls.forEach(function (el) { el.classList.add('in'); });
-    }
+    // Adiciona .in em todos os .reveal pra garantir compatibilidade com seletores .reveal.in
+    // (no caso do CSS ter regras tipo `.market-card.in .rank-item`)
+    $$('.reveal').forEach(function (el) { el.classList.add('in'); });
 
     // ============================================================
     // COUNTERS · stats bar (data-count + data-prefix + data-suffix)
