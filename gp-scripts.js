@@ -76,12 +76,12 @@
   onReady(function () {
 
     // ============================================================
-    // REVEAL · DESATIVADO TOTAL (decisão pragmática 2026-05-19)
-    // Não adiciona .reveal-armed nem .in. Sem essa classe, as regras CSS
-    // `.reveal-armed .reveal { opacity: 0 }` nunca casam, e os reveals
-    // ficam SEMPRE visíveis no estado natural.
-    // Sacrifício: animação de entrada por scroll + cascade stagger interno.
-    // Mantém: counter, typed effect, deck cycle, pulse, chips, form, drawer.
+    // REVEAL-ON-SCROLL · desativado.
+    // O IntersectionObserver falhava em algumas seções no Great Pages, deixando-as
+    // presas em opacity:0. Como solução, o CSS aplica `opacity: 1 !important` em
+    // todos os .reveal e a classe `.reveal-armed` não é mais adicionada aqui.
+    // Pra reativar a animação de entrada no futuro: refatorar pra usar @keyframes
+    // CSS automático (sem depender do IO + JS adicionar .in).
     // ============================================================
 
     // ============================================================
@@ -605,33 +605,6 @@
           if (formSuccess) formSuccess.classList.add('show');
         }, 800);
       });
-    }
-
-    // ============================================================
-    // COOKIE BANNER LGPD
-    // ============================================================
-    var cookieBanner = $('#cookieBanner');
-    var cookieAccept = $('#cookieAccept');
-    var cookieReject = $('#cookieReject');
-    var COOKIE_KEY = 'nv_cookie_consent_next';
-
-    function persistConsent(val) {
-      try { localStorage.setItem(COOKIE_KEY, JSON.stringify({ value: val, ts: Date.now() })); } catch (e) {}
-    }
-    function hideCookieBanner() {
-      if (!cookieBanner) return;
-      cookieBanner.classList.remove('show');
-      setTimeout(function () { cookieBanner.hidden = true; }, 400);
-    }
-    if (cookieBanner) {
-      var stored = null;
-      try { stored = localStorage.getItem(COOKIE_KEY); } catch (e) {}
-      if (!stored) {
-        cookieBanner.hidden = false;
-        setTimeout(function () { cookieBanner.classList.add('show'); }, 1500);
-      }
-      if (cookieAccept) cookieAccept.addEventListener('click', function () { persistConsent('accepted'); hideCookieBanner(); });
-      if (cookieReject) cookieReject.addEventListener('click', function () { persistConsent('rejected'); hideCookieBanner(); });
     }
 
     // Initial render
