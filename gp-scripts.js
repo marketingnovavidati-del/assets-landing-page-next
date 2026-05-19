@@ -76,15 +76,13 @@
   onReady(function () {
 
     // ============================================================
-    // REVEAL · estratégia simplificada e robusta
-    // Adiciona .reveal-armed E .in em todos os reveals IMEDIATAMENTE.
-    // Não usa IntersectionObserver (estava falhando em algumas seções no GP).
-    // Mantém as animações stagger internas (.market-card.in .rank-item etc).
-    // Perde a animação de entrada por scroll, mas garante que nada fica invisível.
+    // REVEAL · DESATIVADO TOTAL (decisão pragmática 2026-05-19)
+    // Não adiciona .reveal-armed nem .in. Sem essa classe, as regras CSS
+    // `.reveal-armed .reveal { opacity: 0 }` nunca casam, e os reveals
+    // ficam SEMPRE visíveis no estado natural.
+    // Sacrifício: animação de entrada por scroll + cascade stagger interno.
+    // Mantém: counter, typed effect, deck cycle, pulse, chips, form, drawer.
     // ============================================================
-    var revealEls = $$('.reveal');
-    document.documentElement.classList.add('reveal-armed');
-    revealEls.forEach(function (el) { el.classList.add('in'); });
 
     // ============================================================
     // COUNTERS · stats bar (data-count + data-prefix + data-suffix)
