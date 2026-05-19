@@ -76,14 +76,55 @@
   onReady(function () {
 
     // ============================================================
-    // REVEAL-ON-SCROLL · DESATIVADO temporariamente
-    // O sistema de reveal estava escondendo as seções abaixo de Decisores no Great Pages.
-    // Por ora, todas as seções aparecem imediatamente sem animação de entrada.
-    // As outras animações (deck-cycle, counter, typed, hover) continuam funcionando.
+    // REVEAL-ON-SCROLL · estratégia defensiva em 4 camadas
+    // 1. Pre-mark above-the-fold como .in
+    // 2. IntersectionObserver pra entrada progressiva
+    // 3. Scroll handler como safety (caso IO falhe)
+    // 4. Force-all timeout de 800ms · garante que NENHUMA seção fique invisível
+    //    mesmo se IO + scroll não dispararem (problema observado no Great Pages)
     // ============================================================
-    // Adiciona .in em todos os .reveal pra garantir compatibilidade com seletores .reveal.in
-    // (no caso do CSS ter regras tipo `.market-card.in .rank-item`)
-    $$('.reveal').forEach(function (el) { el.classList.add('in'); });
+    var revealEls = $$('.reveal');
+
+    // Camada 1: pre-mark above-the-fold antes de armar reveal-armed
+    revealEls.forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight * 0.95 && r.bottom > 0) el.classList.add('in');
+    });
+
+    // Adiciona reveal-armed pra ativar regras de animação
+    document.documentElement.classList.add('reveal-armed');
+
+    // Camada 2: IntersectionObserver
+    if ('IntersectionObserver' in window) {
+      var revealObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); revealObs.unobserve(e.target); }
+        });
+      }, { threshold: 0.05, rootMargin: '0px 0px -5% 0px' });
+      revealEls.forEach(function (el) { if (!el.classList.contains('in')) revealObs.observe(el); });
+
+      // Camada 3: scroll handler como redundância
+      function checkRevealsOnScroll() {
+        revealEls.forEach(function (el) {
+          if (el.classList.contains('in')) return;
+          var r = el.getBoundingClientRect();
+          if (r.top < window.innerHeight * 1.1 && r.bottom > 0) el.classList.add('in');
+        });
+      }
+      window.addEventListener('scroll', checkRevealsOnScroll, { passive: true });
+
+      // Camada 4: FORCE-ALL · garante visibilidade em 800ms se tudo falhar
+      setTimeout(function () {
+        revealEls.forEach(function (el) { el.classList.add('in'); });
+      }, 800);
+
+      // Camada 5: fallback final no load event (DOM totalmente carregado)
+      window.addEventListener('load', function () {
+        revealEls.forEach(function (el) { el.classList.add('in'); });
+      });
+    } else {
+      revealEls.forEach(function (el) { el.classList.add('in'); });
+    }
 
     // ============================================================
     // COUNTERS · stats bar (data-count + data-prefix + data-suffix)
